@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI'm Ready — Modulo 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface2: #22222f;
+    --accent: #7c6af7;
+    --accent2: #f7c46a;
+    --accent3: #6af7c4;
+    --danger: #f76a6a;
+    --text: #f0eff8;
+    --text-muted: #8888aa;
+    --border: #2e2e40;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --font-main: 'DM Sans', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-main);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    width: 100%;
+    max-width: 680px;
+    padding: 20px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .logo {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  .xp-badge {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+
+  /* ─── MAIN AREA ─── */
+  main {
+    width: 100%;
+    max-width: 680px;
+    padding: 24px 24px 120px;
+    flex: 1;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen {
+    display: none;
+    animation: fadeIn 0.35s ease;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── HOME / UNIT MAP ─── */
+  .home-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .home-title span { color: var(--accent); }
+
+  .home-sub {
+    color: var(--text-muted);
+    font-size: 15px;
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  .unit-map {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .unit-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .unit-card:hover { border-color: var(--accent); transform: translateX(4px); }
+  .unit-card.locked { opacity: 0.45; cursor: not-allowed; }
+  .unit-card.locked:hover { transform: none; border-color: var(--border); }
+  .unit-card.completed { border-color: var(--accent3); }
+
+  .unit-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .unit-icon.u1 { background: rgba(124,106,247,0.18); }
+  .unit-icon.u2 { background: rgba(106,247,196,0.18); }
+  .unit-icon.u3 { background: rgba(247,196,106,0.18); }
+
+  .unit-info { flex: 1; }
+  .unit-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+  .unit-desc { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+  .unit-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  .unit-status {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  /* ─── LESSON HEADER ─── */
+  .lesson-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .btn-back {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 18px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-back:hover { color: var(--text); border-color: var(--accent); }
+
+  .lesson-title-bar { flex: 1; }
+  .lesson-unit-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 2px;
+  }
+  .lesson-title-bar h2 { font-size: 18px; font-weight: 600; }
+
+  /* ─── CONTENT CARD ─── */
+  .content-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 28px 24px;
+    margin-bottom: 20px;
+  }
+
+  .content-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    line-height: 1.3;
+  }
+
+  .content-card p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #d4d3e8;
+    margin-bottom: 14px;
+  }
+  .content-card p:last-child { margin-bottom: 0; }
+
+  .highlight-box {
+    background: rgba(124,106,247,0.12);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #c8c4f5;
+  }
+
+  .analogy-box {
+    background: rgba(247,196,106,0.10);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #f0dba0;
+  }
+
+  .warning-box {
+    background: rgba(247,106,106,0.10);
+    border-left: 3px solid var(--danger);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #f0b0b0;
+  }
+
+  /* ─── TOKEN VISUAL ─── */
+  .token-demo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 18px 0;
+  }
+  .tok {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .tok-a { background: rgba(124,106,247,0.25); color: #b0a6ff; border: 1px solid rgba(124,106,247,0.4); }
+  .tok-b { background: rgba(106,247,196,0.20); color: #8af5d4; border: 1px solid rgba(106,247,196,0.35); }
+  .tok-c { background: rgba(247,196,106,0.20); color: #f5d48a; border: 1px solid rgba(247,196,106,0.35); }
+  .tok-d { background: rgba(247,106,196,0.18); color: #f5a8d8; border: 1px solid rgba(247,106,196,0.3); }
+
+  /* ─── QUIZ ─── */
+  .quiz-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+  }
+
+  .quiz-question {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 14px;
+    color: var(--text);
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    line-height: 1.4;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(124,106,247,0.08);
+    transform: translateX(3px);
+  }
+  .option-btn.selected { border-color: var(--accent); background: rgba(124,106,247,0.12); }
+  .option-btn.correct  { border-color: var(--accent3); background: rgba(106,247,196,0.12); color: var(--accent3); }
+  .option-btn.wrong    { border-color: var(--danger); background: rgba(247,106,106,0.10); color: var(--danger); }
+  .option-btn:disabled { cursor: default; }
+
+  /* ─── FEEDBACK PANEL ─── */
+  .feedback-panel {
+    margin-top: 16px;
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .feedback-panel.show { display: block; }
+  .feedback-panel.ok  { background: rgba(106,247,196,0.10); border: 1px solid rgba(106,247,196,0.3); color: var(--accent3); }
+  .feedback-panel.ko  { background: rgba(247,106,106,0.10); border: 1px solid rgba(247,106,106,0.3); color: #f5a0a0; }
+  .feedback-panel strong { display: block; font-size: 15px; margin-bottom: 6px; }
+
+  /* ─── FILL-IN-THE-BLANK ─── */
+  .fill-input {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: var(--font-main);
+    font-size: 15px;
+    width: 100%;
+    margin: 12px 0;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .fill-input:focus { border-color: var(--accent); }
+  .fill-input.correct { border-color: var(--accent3); }
+  .fill-input.wrong   { border-color: var(--danger); }
+
+  /* ─── WORD SORT ─── */
+  .word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 16px;
+    min-height: 44px;
+    padding: 10px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--border);
+  }
+
+  .word-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    user-select: none;
+  }
+  .word-chip:hover { background: rgba(124,106,247,0.15); transform: scale(1.04); }
+  .word-chip.placed { opacity: 0.4; cursor: default; pointer-events: none; }
+
+  .answer-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px;
+    background: rgba(124,106,247,0.05);
+    border-radius: var(--radius-sm);
+    border: 2px dashed rgba(124,106,247,0.3);
+    margin-bottom: 16px;
+    align-items: center;
+  }
+
+  .answer-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(124,106,247,0.18);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .answer-chip:hover { background: rgba(247,106,106,0.15); border-color: var(--danger); }
+
+  /* ─── CTA BUTTON ─── */
+  .btn-cta {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-main);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 18px;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+  .btn-cta:hover { background: #6a59e8; transform: translateY(-1px); }
+  .btn-cta:disabled { background: var(--surface2); color: var(--text-muted); cursor: not-allowed; transform: none; }
+  .btn-cta.success { background: #3ab87a; }
+
+  /* ─── COMPLETION SCREEN ─── */
+  .completion-card {
+    text-align: center;
+    padding: 40px 28px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+  }
+
+  .completion-icon {
+    font-size: 72px;
+    display: block;
+    margin-bottom: 20px;
+    animation: popIn 0.5s cubic-bezier(.17,.67,.45,1.4);
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.4); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .completion-card h2 { font-size: 26px; font-weight: 700; margin-bottom: 10px; }
+  .completion-card p { color: var(--text-muted); font-size: 15px; margin-bottom: 24px; line-height: 1.5; }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin: 24px 0;
+  }
+  .stat-box {
+    text-align: center;
+  }
+  .stat-val {
+    font-family: var(--font-mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent2);
+    display: block;
+  }
+  .stat-lbl {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ─── STEP DOTS ─── */
+  .step-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s, transform 0.2s;
+  }
+  .dot.active { background: var(--accent); transform: scale(1.3); }
+  .dot.done   { background: var(--accent3); }
+
+  /* ─── HEARTS ─── */
+  .hearts {
+    display: flex;
+    gap: 4px;
+    font-size: 16px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 480px) {
+    header { padding: 14px 16px 0; }
+    main   { padding: 18px 16px 100px; }
+    .content-card { padding: 20px 18px; }
+    .home-title { font-size: 22px; }
+  }
+
+  /* ─── INTRO SCREEN ─── */
+  .intro-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+
+  .intro-heading {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .intro-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  /* Video player */
+  .video-player {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .video-screen {
+    background: #08080f;
+    aspect-ratio: 16/9;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .slide-frame {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 28px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .slide-frame.visible { opacity: 1; }
+
+  .slide-frame .slide-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    opacity: 0.7;
+  }
+
+  .slide-frame .slide-title {
+    font-size: clamp(16px, 3vw, 22px);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+
+  .slide-frame .slide-bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .slide-frame .slide-bullets li {
+    background: rgba(124,106,247,0.12);
+    border-left: 2px solid var(--accent);
+    padding: 8px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: clamp(12px, 2vw, 14px);
+    text-align: left;
+    color: #ccc8f5;
+  }
+
+  .slide-frame .slide-icon {
+    font-size: 42px;
+    margin-bottom: 14px;
+  }
+
+  /* play overlay */
+  .play-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(8,8,15,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: opacity 0.3s;
+  }
+  .play-overlay.hidden { opacity: 0; pointer-events: none; }
+
+  .play-btn-big {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    color: white;
+  }
+  .play-btn-big:hover { transform: scale(1.08); background: #6a59e8; }
+
+  .play-overlay p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* video controls bar */
+  .video-controls {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .ctrl-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+  .ctrl-btn:hover { color: var(--text); }
+  .ctrl-btn.active { color: var(--accent); }
+
+  .video-progress-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 99px;
+    cursor: pointer;
+    position: relative;
+  }
+  .video-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s linear;
+    pointer-events: none;
+  }
+
+  .video-time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .slide-counter {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* watched badge */
+  .watched-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(106,247,196,0.12);
+    border: 1px solid rgba(106,247,196,0.3);
+    color: var(--accent3);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 99px;
+    margin-top: 10px;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .watched-badge.show { opacity: 1; }
+
+  /* Podcast player */
+  .podcast-player {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .podcast-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .podcast-art {
+    width: 54px;
+    height: 54px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .podcast-meta { flex: 1; }
+  .podcast-title { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+  .podcast-ep { font-size: 12px; color: var(--text-muted); }
+
+  .podcast-transcript {
+    padding: 14px 20px;
+    max-height: 130px;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .transcript-line {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    padding: 3px 0;
+    transition: color 0.3s;
+    border-radius: 4px;
+  }
+  .transcript-line.active {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .transcript-line .ts {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent);
+    margin-right: 8px;
+    opacity: 0.7;
+  }
+
+  .podcast-controls {
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .podcast-progress-wrap {
+    width: 100%;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 99px;
+    cursor: pointer;
+  }
+  .podcast-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    transition: width 0.8s linear;
+    pointer-events: none;
+  }
+
+  .podcast-ctrl-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .podcast-play-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--accent2);
+    border: none;
+    color: #1a1000;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .podcast-play-btn:hover { transform: scale(1.08); }
+
+  .podcast-time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .speed-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .speed-btn:hover { color: var(--accent2); border-color: var(--accent2); }
+
+  .intro-gate-note {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .intro-gate-note span { color: var(--accent2); font-weight: 600; }
+
+  /* ─── STREAK TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--accent2);
+    color: #1a1000;
+    padding: 12px 24px;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 14px;
+    z-index: 100;
+    transition: transform 0.4s cubic-bezier(.17,.67,.45,1.2), opacity 0.4s;
+    opacity: 0;
+    white-space: nowrap;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">AI'm Ready</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="hearts" id="heartsDisplay">❤️❤️❤️</div>
+    <div class="xp-badge" id="xpBadge">0 XP</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══ INTRO ═══ -->
+  <div class="screen active" id="screen-intro">
+    <div style="margin-top:12px;margin-bottom:24px;">
+      <div class="intro-label">Modulo 1 · Introduzione</div>
+      <h1 class="intro-heading">IA e consapevolezza digitale</h1>
+      <p class="intro-sub">Prima di iniziare le unità interattive, guarda il video introduttivo e ascolta il podcast di accompagnamento. Ti daranno una mappa dei tre temi che approfondiremo.</p>
+    </div>
+
+    <!-- VIDEO SIMULATO -->
+    <div style="margin-bottom:8px;"><div class="intro-label" style="margin-bottom:4px;">&#x1F4F9; Video introduttivo · ~8 min</div></div>
+    <div class="video-player">
+      <div class="video-screen" id="videoScreen" onclick="toggleVideo()">
+        <div class="slide-frame visible" id="vslide-0">
+          <div class="slide-icon">&#x1F916;</div>
+          <div class="slide-title">IA e consapevolezza digitale<br><span style="font-size:0.7em;color:var(--text-muted);font-weight:400;">Modulo 1 · AI'm Ready</span></div>
+        </div>
+        <div class="slide-frame" id="vslide-1">
+          <div class="slide-num">1 / 5 · Come funzionano gli LLM</div>
+          <div class="slide-title">I modelli linguistici non "pensano"</div>
+          <ul class="slide-bullets">
+            <li>Sono sistemi statistici addestrati su miliardi di testi</li>
+            <li>Prevedono la parola più probabile, non la più vera</li>
+            <li>L'architettura Transformer è alla base di GPT, Claude, Gemini</li>
+          </ul>
+        </div>
+        <div class="slide-frame" id="vslide-2">
+          <div class="slide-num">2 / 5 · Token e contesto</div>
+          <div class="slide-title">Il testo diventa numeri</div>
+          <ul class="slide-bullets">
+            <li>Ogni parola è spezzata in frammenti chiamati token</li>
+            <li>I token vengono convertiti in vettori numerici</li>
+            <li>La finestra di contesto = la "memoria" del modello per sessione</li>
+          </ul>
+        </div>
+        <div class="slide-frame" id="vslide-3">
+          <div class="slide-num">3 / 5 · Allucinazioni</div>
+          <div class="slide-title">Perché i modelli inventano</div>
+          <ul class="slide-bullets">
+            <li>Il modello massimizza la coerenza, non la verità</li>
+            <li>In HR: competenze inventate, leggi inesistenti, date sbagliate</li>
+            <li>Non è un bug: è una conseguenza strutturale</li>
+          </ul>
+        </div>
+        <div class="slide-frame" id="vslide-4">
+          <div class="slide-num">4 / 5 · Prompting responsabile</div>
+          <div class="slide-title">5 regole per usare gli LLM in HR</div>
+          <ul class="slide-bullets">
+            <li>Ruolo · Contesto · Compito preciso</li>
+            <li>Vincoli espliciti · Dichiarazione delle incertezze</li>
+            <li>Verifica sempre gli output su dati critici</li>
+          </ul>
+        </div>
+        <div class="slide-frame" id="vslide-5">
+          <div class="slide-icon">&#x2705;</div>
+          <div class="slide-title">Ora sei pronto<br><span style="font-size:0.7em;color:var(--text-muted);font-weight:400;">Completa anche il podcast, poi inizia le unità</span></div>
+        </div>
+        <div class="play-overlay" id="playOverlay">
+          <button class="play-btn-big" id="playBtnBig">&#x25B6;</button>
+          <p>Clicca per avviare il video</p>
+        </div>
+      </div>
+      <div class="video-controls">
+        <button class="ctrl-btn" id="videoPlayCtrl" onclick="toggleVideo()">&#x25B6;</button>
+        <div class="video-progress-wrap" onclick="seekVideo(event)">
+          <div class="video-progress-fill" id="videoProgressFill" style="width:0%"></div>
+        </div>
+        <span class="video-time" id="videoTime">0:00 / 8:00</span>
+        <span class="slide-counter" id="slideCounter">0 / 5</span>
+      </div>
+    </div>
+    <div style="margin-bottom:24px;"><div class="watched-badge" id="videoBadge">&#x2705; Video visto</div></div>
+
+    <!-- PODCAST SIMULATO -->
+    <div style="margin-bottom:8px;"><div class="intro-label" style="margin-bottom:4px;">&#x1F3A7; Podcast · ~6 min</div></div>
+    <div class="podcast-player">
+      <div class="podcast-header">
+        <div class="podcast-art">&#x1F399;&#xFE0F;</div>
+        <div class="podcast-meta">
+          <div class="podcast-title">AI'm Ready Podcast</div>
+          <div class="podcast-ep">Ep. 1 · IA: cosa c'è davvero dentro questi strumenti?</div>
+        </div>
+      </div>
+      <div class="podcast-transcript" id="podcastTranscript">
+        <div class="transcript-line active" id="tl-0"><span class="ts">0:00</span>Benvenuti ad AI'm Ready. In questo episodio parliamo di cosa c'è davvero dentro gli strumenti di intelligenza artificiale che state iniziando a usare.</div>
+        <div class="transcript-line" id="tl-1"><span class="ts">0:45</span>Un Large Language Model non ragiona come un essere umano. È un sistema statistico enormemente complesso che prevede il testo più probabile dato un contesto.</div>
+        <div class="transcript-line" id="tl-2"><span class="ts">1:30</span>Questo ha implicazioni concrete per chi lavora in HR: il modello può sembrare molto sicuro anche quando sbaglia. Quella sicurezza è stilistica, non epistemica.</div>
+        <div class="transcript-line" id="tl-3"><span class="ts">2:15</span>Il concetto di token è fondamentale. Quando inviate un testo lungo — un CV, una policy aziendale — il modello lo legge come sequenza di frammenti numerici, non come voi leggete una pagina.</div>
+        <div class="transcript-line" id="tl-4"><span class="ts">3:00</span>La finestra di contesto è il limite pratico più importante: oltre una certa lunghezza, il modello inizia a dimenticare le parti iniziali del documento.</div>
+        <div class="transcript-line" id="tl-5"><span class="ts">3:45</span>Le allucinazioni non sono anomalie rare. Sono una conseguenza del funzionamento: il modello produce testo coerente anche quando i dati non ci sono.</div>
+        <div class="transcript-line" id="tl-6"><span class="ts">4:30</span>La soluzione non è smettere di usare questi strumenti. È costruire prompt che limitino lo spazio di manovra del modello e verificare sistematicamente gli output critici.</div>
+        <div class="transcript-line" id="tl-7"><span class="ts">5:15</span>Nel prossimo modulo in aula metteremo tutto questo in pratica su casi HR reali. Per ora, buono studio con le tre unità che seguono.</div>
+      </div>
+      <div class="podcast-controls">
+        <div class="podcast-progress-wrap" onclick="seekPodcast(event)">
+          <div class="podcast-progress-fill" id="podcastProgressFill" style="width:0%"></div>
+        </div>
+        <div class="podcast-ctrl-row">
+          <span class="podcast-time" id="podcastTime">0:00 / 6:00</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button class="speed-btn" id="speedBtn" onclick="toggleSpeed()">1×</button>
+            <button class="podcast-play-btn" id="podcastPlayBtn" onclick="togglePodcast()">&#x25B6;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:8px;"><div class="watched-badge" id="podcastBadge">&#x2705; Podcast ascoltato</div></div>
+
+    <p class="intro-gate-note" id="gateNote">Completa <span>video e podcast</span> per sbloccare le unità interattive.</p>
+    <button class="btn-cta" id="btnStartModulo" onclick="goHome()" disabled>Inizia le unità &#x2192;</button>
+  </div>
+
+  <!-- ═══ HOME ═══ -->
+  <div class="screen" id="screen-home">
+    <div style="margin-bottom:32px;margin-top:12px;">
+      <p class="home-title">Modulo 1<br><span>IA e consapevolezza digitale</span></p>
+      <p class="home-sub">Tre unità · ~1 ora · Impara come funzionano gli LLM, cosa sono i token e come evitare le allucinazioni.</p>
+    </div>
+    <div class="unit-map" id="unitMap">
+      <div class="unit-card" id="card-u1" onclick="startUnit(1)">
+        <div class="unit-icon u1">🧠</div>
+        <div class="unit-info">
+          <div class="unit-title">Come funzionano gli LLM</div>
+          <div class="unit-desc">Architettura transformer, training e inferenza spiegati in modo accessibile.</div>
+          <div class="unit-meta">15 min · 3 lezioni · 2 quiz</div>
+        </div>
+        <div class="unit-status" id="status-u1">▶</div>
+      </div>
+      <div class="unit-card locked" id="card-u2">
+        <div class="unit-icon u2">🔤</div>
+        <div class="unit-info">
+          <div class="unit-title">Tokenizzazione e vettorizzazione</div>
+          <div class="unit-desc">Come il testo diventa numeri e perché questo conta per i professionisti HR.</div>
+          <div class="unit-meta">15 min · 3 lezioni · 2 quiz</div>
+        </div>
+        <div class="unit-status" id="status-u2">🔒</div>
+      </div>
+      <div class="unit-card locked" id="card-u3">
+        <div class="unit-icon u3">⚠️</div>
+        <div class="unit-info">
+          <div class="unit-title">Allucinazioni e prompting</div>
+          <div class="unit-desc">Perché i modelli inventano e le 5 regole per prompt efficaci in HR.</div>
+          <div class="unit-meta">30 min · 5 lezioni · 4 quiz</div>
+        </div>
+        <div class="unit-status" id="status-u3">🔒</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ UNIT 1: Come funzionano gli LLM ═══ -->
+  <div class="screen" id="screen-u1">
+    <div class="lesson-header">
+      <button class="btn-back" onclick="goHome()">←</button>
+      <div class="lesson-title-bar">
+        <div class="lesson-unit-label">Unità 1 · LLM</div>
+        <h2>Come funzionano gli LLM</h2>
+      </div>
+    </div>
+
+    <div class="step-dots" id="dots-u1"></div>
+
+    <!-- Step 1: Contenuto -->
+    <div id="u1-step1">
+      <div class="content-card">
+        <h3>Cos'è un Large Language Model?</h3>
+        <p>Un <strong>LLM (Large Language Model)</strong> è un sistema statistico addestrato su miliardi di testi per prevedere, parola dopo parola, qual è la continuazione più probabile di una sequenza.</p>
+        <div class="highlight-box">
+          💡 Non "capisce" nel senso umano: <em>calcola probabilità</em>. Ogni risposta è il risultato di miliardi di parametri che pesano le parole in base al contesto.
+        </div>
+        <p>Il processo si divide in due fasi principali: il <strong>training</strong> (addestramento su enormi corpus di testo) e l'<strong>inferenza</strong> (la generazione della risposta in tempo reale).</p>
+      </div>
+      <button class="btn-cta" onclick="nextStep('u1',1)">Continua →</button>
+    </div>
+
+    <!-- Step 2: Contenuto -->
+    <div id="u1-step2" style="display:none">
+      <div class="content-card">
+        <h3>L'architettura Transformer</h3>
+        <p>Dal 2017 quasi tutti i grandi modelli usano l'architettura <strong>Transformer</strong>. Il suo meccanismo chiave si chiama <em>attenzione</em> (attention): permette al modello di pesare quanto ogni parola nella frase sia rilevante rispetto alle altre.</p>
+        <div class="analogy-box">
+          🏢 <strong>Analogia HR:</strong> immagina di leggere un CV. La tua attenzione salta su "5 anni di esperienza in selezione" in relazione alla JD aperta. Il Transformer fa lo stesso: collega le parti rilevanti del testo tra loro, anche se sono distanti.
+        </div>
+        <p>Più un modello ha <strong>parametri</strong> (GPT-4: ~1 trilione), più riesce a catturare relazioni complesse tra concetti. Ma questo non implica ragionamento logico garantito.</p>
+      </div>
+      <button class="btn-cta" onclick="nextStep('u1',2)">Continua →</button>
+    </div>
+
+    <!-- Step 3: Quiz MC -->
+    <div id="u1-step3" style="display:none">
+      <div class="content-card">
+        <p class="quiz-label">🎯 Verifica rapida — 1 di 2</p>
+        <p class="quiz-question">Un LLM genera testo principalmente:</p>
+        <div class="options-grid" id="q-u1-1">
+          <button class="option-btn" onclick="checkMC('u1-1',this,false,'Un LLM non accede a internet in tempo reale né usa regole grammaticali esplicite.')">Accedendo a internet in tempo reale</button>
+          <button class="option-btn" onclick="checkMC('u1-1',this,true,'Esatto. Il meccanismo centrale è la previsione probabilistica del prossimo token, basata sul contesto.')">Prevedendo statisticamente la parola successiva</button>
+          <button class="option-btn" onclick="checkMC('u1-1',this,false,'Applicare regole grammaticali esplicite è il funzionamento dei vecchi sistemi basati su regole, non dei transformer.')">Applicando regole grammaticali esplicite</button>
+          <button class="option-btn" onclick="checkMC('u1-1',this,false,'I LLM non copiano frasi da un database: generano testo nuovo basandosi sui parametri acquisiti durante il training.')">Copiando frasi da un database fisso</button>
+        </div>
+        <div class="feedback-panel" id="fb-u1-1"></div>
+        <button class="btn-cta" id="btn-u1-1" onclick="nextStep('u1',3)" disabled>Continua →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Quiz MC -->
+    <div id="u1-step4" style="display:none">
+      <div class="content-card">
+        <p class="quiz-label">🎯 Verifica rapida — 2 di 2</p>
+        <p class="quiz-question">Nel contesto HR, quale affermazione sull'architettura Transformer è corretta?</p>
+        <div class="options-grid" id="q-u1-2">
+          <button class="option-btn" onclick="checkMC('u1-2',this,false,'Il numero di parametri non garantisce comprensione logica nel senso umano.')">Un modello con più parametri comprende logicamente i testi HR</button>
+          <button class="option-btn" onclick="checkMC('u1-2',this,false,'Il Transformer non usa regole grammaticali definite manualmente.')">Il Transformer segue regole grammaticali predefinite da esperti</button>
+          <button class="option-btn" onclick="checkMC('u1-2',this,true,'Corretto. Il meccanismo di attenzione collega elementi distanti nel testo — utile per leggere CV o JD lunghe.')">Il meccanismo di attenzione permette di collegare parti distanti del testo</button>
+          <button class="option-btn" onclick="checkMC('u1-2',this,false,'Il training avviene prima, offline, su corpus enormi. Non si aggiorna in tempo reale durante l\'uso.')">Il modello si aggiorna durante ogni conversazione</button>
+        </div>
+        <div class="feedback-panel" id="fb-u1-2"></div>
+        <button class="btn-cta success" id="btn-u1-2" onclick="completeUnit(1)" disabled>Completa unità ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ UNIT 2: Tokenizzazione ═══ -->
+  <div class="screen" id="screen-u2">
+    <div class="lesson-header">
+      <button class="btn-back" onclick="goHome()">←</button>
+      <div class="lesson-title-bar">
+        <div class="lesson-unit-label">Unità 2 · Token</div>
+        <h2>Tokenizzazione e vettorizzazione</h2>
+      </div>
+    </div>
+    <div class="step-dots" id="dots-u2"></div>
+
+    <!-- Step 1 -->
+    <div id="u2-step1">
+      <div class="content-card">
+        <h3>I modelli non leggono parole: leggono token</h3>
+        <p>Prima di elaborare qualsiasi testo, il modello lo divide in <strong>token</strong>: unità sub-lessicali che possono essere parole intere, parti di parola o anche singoli caratteri.</p>
+        <p>Guarda come questa frase viene tokenizzata:</p>
+        <div class="token-demo" id="tokenDemo">
+          <span class="tok tok-a">Sele</span><span class="tok tok-b">zione</span>
+          <span class="tok tok-c"> del</span><span class="tok tok-d"> per</span>
+          <span class="tok tok-a">sonale</span><span class="tok tok-b"> basata</span>
+          <span class="tok tok-c"> su</span><span class="tok tok-d"> com</span>
+          <span class="tok tok-a">petenze</span>
+        </div>
+        <div class="highlight-box">
+          💡 Una pagina di testo normale ≈ 750 token. La "finestra di contesto" di un modello (es. 128.000 token) è il limite di ciò che può "tenere in mente" in una conversazione.
+        </div>
+      </div>
+      <button class="btn-cta" onclick="nextStep('u2',1)">Continua →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="u2-step2" style="display:none">
+      <div class="content-card">
+        <h3>Dai token ai vettori</h3>
+        <p>Ogni token viene convertito in un <strong>vettore</strong>: una lista di numeri che rappresenta il suo significato in relazione a tutti gli altri token visti durante il training.</p>
+        <div class="analogy-box">
+          🗺️ <strong>Analogia:</strong> pensa ai vettori come coordinate su una mappa semantica. "Selezione" e "recruiting" sono vicini. "Selezione" e "bilancio" sono lontani. Il modello usa queste distanze per capire il contesto.
+        </div>
+        <p>Questo spiega perché i modelli eccellono con <strong>testi simili a quelli visti in training</strong> ma possono avere difficoltà con terminologia aziendale interna o acronimi proprietari non presenti nel corpus.</p>
+      </div>
+      <button class="btn-cta" onclick="nextStep('u2',2)">Continua →</button>
+    </div>
+
+    <!-- Step 3: Quiz fill-in -->
+    <div id="u2-step3" style="display:none">
+      <div class="content-card">
+        <p class="quiz-label">🎯 Completa la frase — 1 di 2</p>
+        <p class="quiz-question">Un modello con una finestra di contesto di 128.000 token può tenere in mente circa <strong>___</strong> pagine di testo.</p>
+        <input class="fill-input" id="fill-u2-1" type="text" placeholder="Scrivi un numero..." oninput="checkFill('u2-1')">
+        <div class="feedback-panel" id="fb-u2-1"></div>
+        <button class="btn-cta" id="btn-u2-1" onclick="nextStep('u2',3)" disabled>Continua →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Word sort -->
+    <div id="u2-step4" style="display:none">
+      <div class="content-card">
+        <p class="quiz-label">🎯 Riordina i passaggi — 2 di 2</p>
+        <p class="quiz-question">Metti in ordine il percorso che il testo fa prima di generare una risposta:</p>
+        <div class="word-bank" id="wb-u2"></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">↓ La tua risposta (clicca per rimuovere):</div>
+        <div class="answer-row" id="ar-u2"></div>
+        <div class="feedback-panel" id="fb-u2-ws"></div>
+        <button class="btn-cta success" id="btn-u2-ws" onclick="completeUnit(2)" disabled>Completa unità ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ UNIT 3: Allucinazioni ═══ -->
+  <div class="screen" id="screen-u3">
+    <div class="lesson-header">
+      <button class="btn-back" onclick="goHome()">←</button>
+      <div class="lesson-title-bar">
+        <div class="lesson-unit-label">Unità 3 · Prompting</div>
+        <h2>Allucinazioni e regole di prompting</h2>
+      </div>
+    </div>
+    <div class="step-dots" id="dots-u3"></div>
+
+    <!-- Step 1 -->
+    <div id="u3-step1">
+      <div class="content-card">
+        <h3>Cosa sono le allucinazioni</h3>
+        <p>Si parla di <strong>allucinazione</strong> quando un LLM genera informazioni false ma formalmente plausibili: date inventate, leggi inesistenti, referenze bibliografiche mai pubblicate, CV interpretati in modo errato.</p>
+        <div class="warning-box">
+          ⚠️ <strong>Perché succede?</strong> Il modello massimizza la coerenza statistica del testo, non la veridicità dei fatti. Se nel contesto mancano dati sufficienti, "colma" il vuoto con ciò che è statisticamente probabile — non con ciò che è vero.
+        </div>
+        <p>In ambito HR questo è critico: un modello può attribuire a un candidato competenze non dichiarate nel CV, o citare un articolo di legge inesistente nella LPD svizzera.</p>
+      </div>
+      <button class="btn-cta" onclick="nextStep('u3',1)">Continua →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="u3-step2" style="display:none">
+      <div class="content-card">
+        <h3>5 regole per prompt efficaci</h3>
+        <p>Un prompt ben costruito riduce le allucinazioni e migliora la qualità degli output. Le regole fondamentali:</p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
+          <div class="highlight-box" style="margin:0;">
+            <strong>1. Ruolo</strong> — Assegna un ruolo: <em>"Agisci come un esperto di selezione HR in Svizzera."</em>
+          </div>
+          <div class="highlight-box" style="margin:0;background:rgba(106,247,196,0.08);border-color:var(--accent3);color:#a8f0d8;">
+            <strong>2. Contesto</strong> — Fornisci i dati rilevanti nel prompt stesso. Non dare per scontato che il modello li conosca.
+          </div>
+          <div class="highlight-box" style="margin:0;background:rgba(247,196,106,0.08);border-color:var(--accent2);color:#f0d8a0;">
+            <strong>3. Compito preciso</strong> — Specifica esattamente cosa vuoi: formato, lunghezza, lingua.
+          </div>
+          <div class="highlight-box" style="margin:0;background:rgba(247,106,196,0.08);border-color:#f76ac8;color:#f0a8d8;">
+            <strong>4. Vincoli</strong> — Dì cosa NON deve fare: <em>"Non inventare dati non presenti nel testo."</em>
+          </div>
+          <div class="highlight-box" style="margin:0;background:rgba(106,180,247,0.08);border-color:#6ab4f7;color:#a0c8f0;">
+            <strong>5. Verifica</strong> — Chiedi al modello di segnalare incertezze: <em>"Se non sei sicuro, dillo esplicitamente."</em>
+          </div>
+        </div>
+      </div>
+      <button class="btn-cta" onclick="nextStep('u3',2)">Continua →</button>
+    </div>
+
+    <!-- Step 3: Quiz MC -->
+    <div id="u3-step3" style="display:none">
+      <div class="content-card">
+        <p class="quiz-label">🎯 Scenario HR — 1 di 3</p>
+        <p class="quiz-question">Stai usando un LLM per analizzare i CV ricevuti per una posizione HR Manager. Il modello indica che un candidato ha "competenze avanzate in SAP SuccessFactors". Non lo hai chiesto e nel CV non c'è scritto. Cosa sta probabilmente accadendo?</p>
+        <div class="options-grid" id="q-u3-1">
+          <button class="option-btn" onclick="checkMC('u3-1',this,false,'Il modello non accede a LinkedIn o database esterni durante l\'inferenza.')">Il modello ha trovato il profilo LinkedIn del candidato</button>
+          <button class="option-btn" onclick="checkMC('u3-1',this,true,'Esatto. Il modello ha inferito statisticamente una competenza probabile per un profilo HR Manager, ma non verificata. È un\'allucinazione.')">Il modello sta allucinando: ha inferito una competenza probabile ma non presente nel documento</button>
+          <button class="option-btn" onclick="checkMC('u3-1',this,false,'I modelli non hanno accesso diretto a CV caricati in precedenza in altre sessioni.')">Il candidato aveva un CV precedente nel database del modello</button>
+          <button class="option-btn" onclick="checkMC('u3-1',this,false,'Non si può escludere l\'errore umano, ma la causa più probabile qui è il comportamento statistico del modello.')">Hai commesso un errore di lettura del CV</button>
+        </div>
+        <div class="feedback-panel" id="fb-u3-1"></div>
+        <button class="btn-cta" id="btn-u3-1" onclick="nextStep('u3',3)" disabled>Continua →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Quiz MC -->
+    <div id="u3-step4" style="display:none">
+      <div class="content-card">
+        <p class="quiz-label">🎯 Prompt design — 2 di 3</p>
+        <p class="quiz-question">Quale prompt è più efficace per analizzare un CV rispetto a una JD, secondo le 5 regole?</p>
+        <div class="options-grid" id="q-u3-2">
+          <button class="option-btn" onclick="checkMC('u3-2',this,false,'Troppo generico: nessun ruolo, nessun contesto, nessun vincolo specifico.')">Analizza questo CV per la posizione aperta.</button>
+          <button class="option-btn" onclick="checkMC('u3-2',this,true,'Corretto: definisce il ruolo, fornisce contesto (JD allegata), precisa il compito e aggiunge un vincolo esplicito contro le inferenze non supportate.')">Agisci come esperto di selezione HR. Analizza il CV allegato rispetto alla JD fornita. Elenca solo le competenze esplicitamente dichiarate. Se non trovi corrispondenza per un requisito, scrivi \'non indicato\'.")">Agisci come esperto di selezione HR. Analizza il CV allegato rispetto alla JD fornita. Elenca solo le competenze esplicitamente dichiarate. Se non trovi corrispondenza per un requisito, scrivi "non indicato".</button>
+          <button class="option-btn" onclick="checkMC('u3-2',this,false,'Richiedere un giudizio soggettivo ("impression") senza struttura aumenta il rischio di output non verificabili.')">Dimmi la tua impressione su questo candidato.</button>
+          <button class="option-btn" onclick="checkMC('u3-2',this,false,'Chiedere una previsione su dati non disponibili è esattamente il tipo di richiesta che induce allucinazioni.')">Prevedi se questo candidato è adatto al ruolo.</button>
+        </div>
+        <div class="feedback-panel" id="fb-u3-2"></div>
+        <button class="btn-cta" id="btn-u3-2" onclick="nextStep('u3',4)" disabled>Continua →</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Quiz MC -->
+    <div id="u3-step5" style="display:none">
+      <div class="content-card">
+        <p class="quiz-label">🎯 Verifica finale — 3 di 3</p>
+        <p class="quiz-question">Quale delle seguenti pratiche riduce concretamente il rischio di allucinazioni in un contesto HR?</p>
+        <div class="options-grid" id="q-u3-3">
+          <button class="option-btn" onclick="checkMC('u3-3',this,false,'Formulare le domande in modo creativo non riduce le allucinazioni: il modello genera comunque testo statisticamente plausibile.')">Formulare le domande in modo creativo e originale</button>
+          <button class="option-btn" onclick="checkMC('u3-3',this,false,'Usare un modello più grande riduce alcune allucinazioni ma non le elimina, e non è una pratica di prompting.')">Usare sempre il modello con più parametri disponibile</button>
+          <button class="option-btn" onclick="checkMC('u3-3',this,true,'Corretto. Richiedere citazioni esplicite e dichiarare i vincoli nel prompt sono le contromisure più efficaci a livello di prompting.')">Includere nel prompt l\'istruzione "cita solo ciò che trovi nel documento fornito" e verificare manualmente gli output critici</button>
+          <button class="option-btn" onclick="checkMC('u3-3',this,false,'Evitare argomenti complessi limiterebbe drasticamente l\'utilità dello strumento senza risolvere il problema strutturale.')">Evitare di usare LLM per argomenti complessi</button>
+        </div>
+        <div class="feedback-panel" id="fb-u3-3"></div>
+        <button class="btn-cta success" id="btn-u3-3" onclick="completeUnit(3)" disabled>Completa modulo ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ COMPLETION ═══ -->
+  <div class="screen" id="screen-complete">
+    <div class="completion-card">
+      <span class="completion-icon">🏆</span>
+      <h2>Modulo 1 completato!</h2>
+      <p>Hai acquisito le basi su LLM, tokenizzazione e prompting responsabile. Ora puoi procedere con il Modulo 2 in aula.</p>
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="stat-val" id="finalXP">0</span>
+          <span class="stat-lbl">XP guadagnati</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val" id="finalAcc">—</span>
+          <span class="stat-lbl">Precisione</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val" id="finalHearts">3</span>
+          <span class="stat-lbl">Cuori rimasti</span>
+        </div>
+      </div>
+      <button class="btn-cta" onclick="restartAll()" style="background:var(--surface2);color:var(--text);">↩ Ricomincia</button>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───
+let xp = 0;
+let hearts = 3;
+let totalQ = 0;
+let correctQ = 0;
+let unlockedUnits = [1];
+let completedUnits = [];
+
+const unitSteps = { u1: 4, u2: 4, u3: 5 };
+let currentStep = {};
+
+// ─── VIDEO STATE ───
+const VIDEO_DURATION = 480; // 8 min in seconds
+const VIDEO_SLIDES = 5;     // slides 1-5 (0 is cover)
+let videoPlaying = false;
+let videoCurrentTime = 0;
+let videoInterval = null;
+let videoWatched = false;
+
+// ─── PODCAST STATE ───
+const POD_DURATION = 360; // 6 min
+const POD_LINES = 8;
+let podPlaying = false;
+let podCurrentTime = 0;
+let podInterval = null;
+let podWatched = false;
+let podSpeed = 1;
+
+// ─── VIDEO LOGIC ───
+function toggleVideo() {
+  if (videoWatched && !videoPlaying) return; // allow replay but keep badge
+  if (videoPlaying) {
+    pauseVideo();
+  } else {
+    playVideo();
+  }
+}
+
+function playVideo() {
+  videoPlaying = true;
+  document.getElementById('playOverlay').classList.add('hidden');
+  document.getElementById('videoPlayCtrl').textContent = '⏸';
+  videoInterval = setInterval(() => {
+    videoCurrentTime += 1;
+    if (videoCurrentTime >= VIDEO_DURATION) {
+      videoCurrentTime = VIDEO_DURATION;
+      clearInterval(videoInterval);
+      videoPlaying = false;
+      videoWatched = true;
+      document.getElementById('videoPlayCtrl').textContent = '↺';
+      document.getElementById('videoBadge').classList.add('show');
+      checkIntroGate();
+    }
+    updateVideoUI();
+  }, 200); // accelerated: 1s real = 5s simulated (8min in ~96sec)
+}
+
+function pauseVideo() {
+  videoPlaying = false;
+  clearInterval(videoInterval);
+  document.getElementById('videoPlayCtrl').textContent = '▶';
+  if (!videoWatched) {
+    document.getElementById('playOverlay').style.opacity = '0.6';
+    document.getElementById('playOverlay').classList.remove('hidden');
+    document.getElementById('playBtnBig').textContent = '▶';
+  }
+}
+
+function seekVideo(e) {
+  const wrap = e.currentTarget;
+  const rect = wrap.getBoundingClientRect();
+  const pct  = (e.clientX - rect.left) / rect.width;
+  videoCurrentTime = Math.floor(pct * VIDEO_DURATION);
+  updateVideoUI();
+  if (!videoPlaying && !videoWatched) playVideo();
+}
+
+function updateVideoUI() {
+  const pct = videoCurrentTime / VIDEO_DURATION;
+  document.getElementById('videoProgressFill').style.width = (pct * 100) + '%';
+  const m = Math.floor(videoCurrentTime / 60);
+  const s = videoCurrentTime % 60;
+  document.getElementById('videoTime').textContent = m + ':' + String(s).padStart(2,'0') + ' / 8:00';
+
+  // which slide to show
+  const slideIdx = videoCurrentTime === 0 ? 0 :
+    videoCurrentTime >= VIDEO_DURATION ? VIDEO_SLIDES :
+    Math.min(Math.ceil((videoCurrentTime / VIDEO_DURATION) * VIDEO_SLIDES), VIDEO_SLIDES);
+
+  for (let i = 0; i <= VIDEO_SLIDES; i++) {
+    const el = document.getElementById('vslide-' + i);
+    if (el) el.classList.toggle('visible', i === slideIdx);
+  }
+  document.getElementById('slideCounter').textContent = Math.min(slideIdx, VIDEO_SLIDES) + ' / ' + VIDEO_SLIDES;
+}
+
+// ─── PODCAST LOGIC ───
+function togglePodcast() {
+  if (podPlaying) {
+    pausePodcast();
+  } else {
+    playPodcast();
+  }
+}
+
+function playPodcast() {
+  podPlaying = true;
+  document.getElementById('podcastPlayBtn').textContent = '⏸';
+  podInterval = setInterval(() => {
+    podCurrentTime += podSpeed;
+    if (podCurrentTime >= POD_DURATION) {
+      podCurrentTime = POD_DURATION;
+      clearInterval(podInterval);
+      podPlaying = false;
+      podWatched = true;
+      document.getElementById('podcastPlayBtn').textContent = '↺';
+      document.getElementById('podcastBadge').classList.add('show');
+      checkIntroGate();
+    }
+    updatePodcastUI();
+  }, 200);
+}
+
+function pausePodcast() {
+  podPlaying = false;
+  clearInterval(podInterval);
+  document.getElementById('podcastPlayBtn').textContent = '▶';
+}
+
+function seekPodcast(e) {
+  const wrap = e.currentTarget;
+  const rect = wrap.getBoundingClientRect();
+  const pct  = (e.clientX - rect.left) / rect.width;
+  podCurrentTime = Math.floor(pct * POD_DURATION);
+  updatePodcastUI();
+  if (!podPlaying) playPodcast();
+}
+
+function toggleSpeed() {
+  const speeds = [1, 1.5, 2];
+  const idx = speeds.indexOf(podSpeed);
+  podSpeed = speeds[(idx + 1) % speeds.length];
+  document.getElementById('speedBtn').textContent = podSpeed + '×';
+}
+
+function updatePodcastUI() {
+  const pct = podCurrentTime / POD_DURATION;
+  document.getElementById('podcastProgressFill').style.width = (pct * 100) + '%';
+  const m = Math.floor(podCurrentTime / 60);
+  const s = podCurrentTime % 60;
+  document.getElementById('podcastTime').textContent = m + ':' + String(s).padStart(2,'0') + ' / 6:00';
+
+  // active transcript line
+  const lineIdx = Math.min(Math.floor(pct * POD_LINES), POD_LINES - 1);
+  for (let i = 0; i < POD_LINES; i++) {
+    const el = document.getElementById('tl-' + i);
+    if (el) {
+      el.classList.toggle('active', i === lineIdx);
+      if (i === lineIdx) {
+        el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }
+}
+
+// ─── GATE CHECK ───
+function checkIntroGate() {
+  if (videoWatched && podWatched) {
+    const btn = document.getElementById('btnStartModulo');
+    const note = document.getElementById('gateNote');
+    btn.disabled = false;
+    note.innerHTML = '&#x2705; Ottimo! Puoi ora iniziare le unità interattive.';
+    note.style.color = 'var(--accent3)';
+    showToast('🎉 Accesso sbloccato! +10 XP');
+    xp += 10;
+    updateUI();
+  }
+}
+
+// ─── INIT ───
+function init() {
+  buildDots('u1', unitSteps.u1);
+  buildDots('u2', unitSteps.u2);
+  buildDots('u3', unitSteps.u3);
+  buildWordSort();
+  updateUI();
+  // start on intro screen
+  showScreen('intro');
+}
+
+function buildDots(unit, total) {
+  const el = document.getElementById('dots-' + unit);
+  if (!el) return;
+  el.innerHTML = '';
+  for (let i = 1; i <= total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dot-' + unit + '-' + i;
+    el.appendChild(d);
+  }
+}
+
+function updateDots(unit, step) {
+  const total = unitSteps[unit];
+  for (let i = 1; i <= total; i++) {
+    const d = document.getElementById('dot-' + unit + '-' + i);
+    if (!d) continue;
+    d.className = 'dot' + (i < step ? ' done' : i === step ? ' active' : '');
+  }
+}
+
+function updateUI() {
+  document.getElementById('xpBadge').textContent = xp + ' XP';
+  document.getElementById('progressFill').style.width = (xp / 250 * 100) + '%';
+  let h = '';
+  for (let i = 0; i < 3; i++) h += (i < hearts ? '❤️' : '🖤');
+  document.getElementById('heartsDisplay').innerHTML = h;
+  // unit card states
+  [1,2,3].forEach(u => {
+    const card = document.getElementById('card-u' + u);
+    const status = document.getElementById('status-u' + u);
+    if (completedUnits.includes(u)) {
+      card.classList.remove('locked'); card.classList.add('completed');
+      status.textContent = '✅';
+      if (u < 3) { // ensure onclick
+        card.onclick = () => startUnit(u);
+      }
+    } else if (unlockedUnits.includes(u)) {
+      card.classList.remove('locked', 'completed');
+      status.textContent = '▶';
+      card.onclick = () => startUnit(u);
+    } else {
+      card.classList.add('locked');
+      card.classList.remove('completed');
+      status.textContent = '🔒';
+      card.onclick = null;
+    }
+  });
+}
+
+// ─── NAVIGATION ───
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goHome() {
+  showScreen('home');
+  updateUI();
+}
+
+function startUnit(n) {
+  const u = 'u' + n;
+  currentStep[u] = 1;
+  showScreen(u);
+  showStep(u, 1);
+}
+
+function showStep(unit, step) {
+  const total = unitSteps[unit];
+  for (let i = 1; i <= total; i++) {
+    const el = document.getElementById(unit + '-step' + i);
+    if (el) el.style.display = (i === step) ? 'block' : 'none';
+  }
+  updateDots(unit, step);
+  window.scrollTo(0,0);
+}
+
+function nextStep(unit, current) {
+  const next = current + 1;
+  currentStep[unit] = next;
+  showStep(unit, next);
+}
+
+// ─── WORD SORT ───
+const wsWords  = ['Testo grezzo', 'Tokenizzazione', 'Vettorizzazione', 'Elaborazione Transformer', 'Output generato'];
+const wsOrder  = ['Testo grezzo', 'Tokenizzazione', 'Vettorizzazione', 'Elaborazione Transformer', 'Output generato'];
+let wsPlaced = [];
+
+function buildWordSort() {
+  const wb = document.getElementById('wb-u2');
+  const ar = document.getElementById('ar-u2');
+  if (!wb || !ar) return;
+  wb.innerHTML = '';
+  ar.innerHTML = '';
+  wsPlaced = [];
+  const shuffled = [...wsWords].sort(() => Math.random() - 0.5);
+  shuffled.forEach(w => {
+    const chip = document.createElement('span');
+    chip.className = 'word-chip';
+    chip.textContent = w;
+    chip.dataset.word = w;
+    chip.onclick = () => placeWord(w, chip);
+    wb.appendChild(chip);
+  });
+}
+
+function placeWord(word, chip) {
+  if (wsPlaced.includes(word)) return;
+  wsPlaced.push(word);
+  chip.classList.add('placed');
+  const ar = document.getElementById('ar-u2');
+  const ac = document.createElement('span');
+  ac.className = 'answer-chip';
+  ac.textContent = word;
+  ac.dataset.word = word;
+  ac.onclick = () => removeWord(word, ac, chip);
+  ar.appendChild(ac);
+  checkWordSort();
+}
+
+function removeWord(word, ac, chip) {
+  wsPlaced = wsPlaced.filter(w => w !== word);
+  ac.remove();
+  chip.classList.remove('placed');
+  document.getElementById('btn-u2-ws').disabled = true;
+  document.getElementById('fb-u2-ws').className = 'feedback-panel';
+}
+
+function checkWordSort() {
+  if (wsPlaced.length !== wsOrder.length) return;
+  const correct = wsPlaced.every((w,i) => w === wsOrder[i]);
+  const fb = document.getElementById('fb-u2-ws');
+  const btn = document.getElementById('btn-u2-ws');
+  fb.className = 'feedback-panel show ' + (correct ? 'ok' : 'ko');
+  totalQ++;
+  if (correct) {
+    correctQ++;
+    fb.innerHTML = '<strong>✅ Ordine corretto!</strong>Questo è esattamente il percorso che il testo compie: dal formato grezzo all\'output generato.';
+    addXP(20);
+    btn.disabled = false;
+  } else {
+    if (hearts > 0) hearts--;
+    updateUI();
+    fb.innerHTML = '<strong>❌ Non è l\'ordine corretto.</strong>Riprova: ricorda che la tokenizzazione precede la vettorizzazione, che precede l\'elaborazione del Transformer.';
+    // reset
+    setTimeout(() => { buildWordSort(); fb.className = 'feedback-panel'; }, 1800);
+  }
+}
+
+// ─── MULTIPLE CHOICE ───
+function checkMC(qid, btn, isCorrect, explanation) {
+  const container = document.getElementById('q-' + qid);
+  const fb = document.getElementById('fb-' + qid);
+  const ctaId = 'btn-' + qid;
+  container.querySelectorAll('.option-btn').forEach(b => { b.disabled = true; });
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    // highlight correct
+    container.querySelectorAll('.option-btn').forEach(b => {
+      if (b !== btn && b.getAttribute('onclick') && b.getAttribute('onclick').includes(',true,')) {
+        b.classList.add('correct');
+      }
+    });
+  }
+  fb.className = 'feedback-panel show ' + (isCorrect ? 'ok' : 'ko');
+  fb.innerHTML = '<strong>' + (isCorrect ? '✅ Corretto!' : '❌ Non esatto.') + '</strong>' + explanation;
+  totalQ++;
+  if (isCorrect) {
+    correctQ++;
+    addXP(15);
+    document.getElementById(ctaId).disabled = false;
+  } else {
+    if (hearts > 0) hearts--;
+    updateUI();
+    // allow continue anyway after wrong
+    setTimeout(() => { document.getElementById(ctaId).disabled = false; }, 1500);
+  }
+}
+
+// ─── FILL IN BLANK ───
+function checkFill(qid) {
+  const input = document.getElementById('fill-' + qid);
+  const fb = document.getElementById('fb-' + qid);
+  const btn = document.getElementById('btn-' + qid);
+  const val = parseInt(input.value.trim());
+  // 128000 tokens / 750 ≈ 170 pages — accept 160-180
+  const correct = val >= 160 && val <= 180;
+  if (input.value.trim() === '') {
+    input.className = 'fill-input'; fb.className = 'feedback-panel'; btn.disabled = true; return;
+  }
+  if (!isNaN(val) && val > 0) {
+    totalQ++;
+    if (correct) {
+      correctQ++;
+      input.className = 'fill-input correct';
+      fb.className = 'feedback-panel show ok';
+      fb.innerHTML = '<strong>✅ Corretto!</strong>128.000 ÷ 750 ≈ 170 pagine. Questa è la "memoria di lavoro" del modello per una singola sessione.';
+      addXP(15);
+      btn.disabled = false;
+    } else {
+      if (hearts > 0) hearts--;
+      updateUI();
+      input.className = 'fill-input wrong';
+      fb.className = 'feedback-panel show ko';
+      fb.innerHTML = '<strong>❌ Non esatto.</strong>128.000 token ÷ 750 (token per pagina) ≈ <strong>170 pagine</strong>. Riprova o premi Continua.';
+      setTimeout(() => { btn.disabled = false; }, 1500);
+    }
+  }
+}
+
+// ─── UNIT COMPLETE ───
+function completeUnit(n) {
+  if (!completedUnits.includes(n)) completedUnits.push(n);
+  addXP(30);
+  showToast('🎉 Unità ' + n + ' completata! +30 XP');
+  // unlock next
+  if (n < 3 && !unlockedUnits.includes(n+1)) unlockedUnits.push(n+1);
+  updateUI();
+  if (completedUnits.length === 3) {
+    setTimeout(() => {
+      document.getElementById('finalXP').textContent = xp;
+      document.getElementById('finalAcc').textContent = totalQ > 0 ? Math.round(correctQ/totalQ*100) + '%' : '—';
+      document.getElementById('finalHearts').textContent = hearts;
+      showScreen('complete');
+    }, 600);
+  } else {
+    setTimeout(() => goHome(), 600);
+  }
+}
+
+// ─── XP & TOAST ───
+function addXP(amount) {
+  xp += amount;
+  updateUI();
+  showToast('+' + amount + ' XP');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ─── RESTART ───
+function restartAll() {
+  xp = 0; hearts = 3; totalQ = 0; correctQ = 0;
+  unlockedUnits = [1]; completedUnits = [];
+  // reset video
+  videoPlaying = false; videoCurrentTime = 0; videoWatched = false;
+  clearInterval(videoInterval);
+  document.getElementById('videoProgressFill').style.width = '0%';
+  document.getElementById('videoTime').textContent = '0:00 / 8:00';
+  document.getElementById('slideCounter').textContent = '0 / 5';
+  document.getElementById('videoBadge').classList.remove('show');
+  document.getElementById('videoPlayCtrl').textContent = '▶';
+  document.getElementById('playOverlay').classList.remove('hidden');
+  document.getElementById('playOverlay').style.opacity = '';
+  for (let i = 0; i <= 5; i++) {
+    const el = document.getElementById('vslide-' + i);
+    if (el) el.classList.toggle('visible', i === 0);
+  }
+  // reset podcast
+  podPlaying = false; podCurrentTime = 0; podWatched = false; podSpeed = 1;
+  clearInterval(podInterval);
+  document.getElementById('podcastProgressFill').style.width = '0%';
+  document.getElementById('podcastTime').textContent = '0:00 / 6:00';
+  document.getElementById('podcastBadge').classList.remove('show');
+  document.getElementById('podcastPlayBtn').textContent = '▶';
+  document.getElementById('speedBtn').textContent = '1×';
+  for (let i = 0; i < 8; i++) {
+    const el = document.getElementById('tl-' + i);
+    if (el) el.classList.toggle('active', i === 0);
+  }
+  // reset gate
+  const btn = document.getElementById('btnStartModulo');
+  btn.disabled = true;
+  const note = document.getElementById('gateNote');
+  note.innerHTML = 'Completa <span>video e podcast</span> per sbloccare le unità interattive.';
+  note.style.color = '';
+  buildWordSort();
+  // reset quizzes
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = false;
+    b.className = 'option-btn';
+  });
+  document.querySelectorAll('.feedback-panel').forEach(fb => { fb.className = 'feedback-panel'; fb.innerHTML = ''; });
+  document.querySelectorAll('.fill-input').forEach(i => { i.value=''; i.className='fill-input'; });
+  document.querySelectorAll('.btn-cta').forEach(b => {
+    if (b.id && b.id.startsWith('btn-')) b.disabled = true;
+  });
+  updateUI();
+  showScreen('intro');
+}
+
+init();
+</script>
+</body>
+</html>
